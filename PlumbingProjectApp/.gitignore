@@ -47,3 +47,4 @@ yarn-error.*
 /Include
 /share
 /Scripts
+/__pycache__/
