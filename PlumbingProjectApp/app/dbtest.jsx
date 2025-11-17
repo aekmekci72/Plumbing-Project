@@ -55,7 +55,7 @@ export default function App() {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
       <Text className="title">DB Test</Text>
       <Text className="subtitle">Add books and fetch below.</Text>
 
