@@ -1,33 +1,41 @@
 # Plumbing-Project
 
-## Tech Stack
+A web application built using a single React Native codebase (via React Native for Web). The application communicates with a Python Flask backend, uses Firebase for secure authentication and data storage, and integrates AI features powered by a large language model (LLM).
 
-React Native (runs on iOS and Android + same codebase can be used for web app)
+## Tech Stack Overview
 
-Expo: framework used to test and view the application
+#### Frontend
 
-Tailwind CSS
+React Native (with React Native for Web) – Core UI framework for building apps from a single codebase, running on web browsers via React Native for Web (extension layer).
+Expo – Provides build tools, device testing, and development environment
+Tailwind CSS – Utility-first styling for fast and responsive UI design
+Axios – Used for making HTTPS API requests to the backend
 
-Server: Python Flask
+#### Backend
 
-The React Native for web frontend communicates with the Flask backend through API calls using Axios. Flask exposes endpoints that the frontend can request to retrieve or send data in formats like JSON.
+Python Flask – Lightweight server that exposes REST API endpoints
+Communicates with the frontend via JSON-based API calls
 
-Firebase Auth
+#### Authentication & Database
 
-FireAuth for verifying federated identity providers (Google, Twitter, etc); hesitant about use with username/password (need more details)
+Firebase Authentication
+- Supports federated identity providers such as Google Sign-In
+- Tokens are verified server-side using Firebase Admin SDK
 
-FireORM
+Cloud Firestore (Firebase)
+- NoSQL document-based database
+- Stores application data (users, roles, books, etc.)
 
-Firebase database → Cloud Firestore
+#### ORM / Data Layer
 
-NOSQL DB
+FireORM – Used to manage Firestore data with an object-model interface
 
-Vercel (deployment with SSL/TLS encryption)
+#### AI / Caching
 
-LLM to use: https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2 
+Redis – Used for caching responses and improving AI/LLM request performance
+LLM Model Used: Mistral-7B-Instruct-v0.2
+- Hosted on Hugging Face: https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2
 
-### Exporting & Importing Process
+#### PDF Generation
 
-React libraries: DataTable, CSVLink
-
-Python libraries: csv, StringIO
+jsPDF – React library used for exporting and generating PDF documents
