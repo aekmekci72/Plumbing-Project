@@ -31,20 +31,17 @@ export default function Login() {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        // Fetch role from backend
-        user.getIdToken(true).then(async (idToken) => {
-          try {
-            const res = await axios.post("http://localhost:5000/verify_token", { idToken });
-            setRole(res.data.role);
-          } catch (err) {
-            console.error("Failed to fetch role:", err);
-            setRole("user");
-          }
-        });
+        try {
+          const idToken = await user.getIdToken(true);
+          const res = await axios.post("http://localhost:5000/verify_token", { idToken });
+          setRole(res.data.role);
+        } catch (err) {
+          console.error("Failed to fetch role:", err);
+          setRole("user");
+        }
       } else {
         setCurrentUser(null);
         setRole(null);
@@ -59,7 +56,6 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Save user to Firestore if new
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
@@ -67,7 +63,6 @@ export default function Login() {
       }
 
       const idToken = await user.getIdToken(true);
-
       const res = await axios.post("http://localhost:5000/verify_token", { idToken });
       setRole(res.data.role);
 
@@ -101,6 +96,7 @@ export default function Login() {
               {currentUser.displayName} {role ? `(${role})` : ""}
             </Text>
           </Text>
+          {role === "admin" && <Text style={styles.adminText}>You have admin access!</Text>}
           <Pressable style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.buttonText}>Logout</Text>
           </Pressable>
@@ -121,6 +117,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
   title: { fontSize: 28, fontWeight: "700", marginBottom: 24 },
   userText: { fontSize: 18, marginBottom: 16 },
+  adminText: { fontSize: 16, fontWeight: "700", color: "#d35400", marginBottom: 10 },
   button: { backgroundColor: "#2b7a4b", padding: 16, borderRadius: 12, marginTop: 10 },
   logoutButton: { backgroundColor: "#c0392b", padding: 16, borderRadius: 12, marginTop: 10 },
   buttonText: { color: "white", fontWeight: "700" },
