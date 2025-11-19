@@ -10,7 +10,7 @@ def get_cache(key):
         return json.loads(cached)
     return None
 
-def set_cache(key, value, ttl = 3600):
+def set_cache(key, value, ttl=3600):
     cache.set(key, json.dumps(value), ex=ttl)
 
 def make_prompt_key(prompt):
