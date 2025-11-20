@@ -1,16 +1,16 @@
-import { useState, useRef } from "react";
+import "./login";
+import { useState, useRef, useEffect } from "react";
 import { Image, Animated, Dimensions, Pressable, Text, View, TextInput } from "react-native";
 import { Link, Stack, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { getAuth } from "firebase/auth";
+import axios from "axios";
 import './global.css';
 
 export default function Layout() {
-
-  // const res = await axios.post("http://localhost:5001/get_role", {
-  //   idToken,
-  // });
   const pathname = usePathname();
+  const [role, setRole] = useState(null);
 
   // Map a route to a simple page name  
   function getPage() {
@@ -20,6 +20,7 @@ export default function Layout() {
     if (pathname.startsWith("/chatbot")) return "chatbot";
     if (pathname.startsWith("/filedownload")) return "filedownload";
     if (pathname.startsWith("/login")) return "login";
+    if (pathname.startsWith("/adminonly")) return "adminonly";
 
     return "";
   }
@@ -39,14 +40,34 @@ export default function Layout() {
     }).start();
   };
 
+  const fetchRole = async () => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("User not logged in");
+  
+      const idToken = await user.getIdToken(true);
+  
+      const res = await axios.post("http://localhost:5001/get_user_role", {
+        idToken,
+      });
+      const roleValue = typeof res.data === "string" ? res.data : res.data.role;
+
+      setRole(roleValue);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
   function NavItem({ icon, label, page, href }) {
     const isActive = getPage() === page;
   
     return (
       <Link href={href} asChild>
         <Pressable
-          className={`
-            flex-row items-center px-3 py-2 rounded-lg gap-3
+          className={`flex-row items-center px-3 py-2 rounded-lg gap-3
             ${isActive ? "bg-gray-100" : ""}
           `}
         >
@@ -57,8 +78,7 @@ export default function Layout() {
           />
   
           <Text
-            className={`
-              text-sm
+            className={`text-sm
               ${isActive ? "text-purple-600 font-semibold" : "text-gray-800"}
             `}
           >
@@ -68,6 +88,21 @@ export default function Layout() {
       </Link>
     );
   }
+
+  useEffect(() => {  
+    const auth = getAuth();
+  
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+  
+      if (!user) {
+        return;
+      }
+  
+      fetchRole();
+    });
+  
+    return unsubscribe;
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fbf7" }}>
@@ -137,7 +172,9 @@ export default function Layout() {
         <Text style={{ fontSize: 13, color: "#6b7280", marginBottom: 8 }}>Section Divider</Text>
         
         <View style={{ gap: 6 }}>
-          <NavItem icon="briefcase-outline" label="Opportunities" href="/" />
+          {role === "admin" && (
+            <NavItem icon="briefcase-outline" label="Admin Only" page="adminonly" href="/adminonly" />
+          )}
 
           <NavItem icon="albums-outline" label="Accounts" href="/" />
 
